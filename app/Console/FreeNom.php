@@ -182,7 +182,7 @@ class FreeNom
                         'cookies' => $this->jar
                     ]);
                 } catch (\Exception $e) {
-                    system_log(sprintf('%s：续期请求出错：%s', $this->username, $e->getMessage()));
+                    system_log(sprintf('%s：續期要求出錯：%s', $this->username, $e->getMessage()));
                     continue;
                 }
 
@@ -190,43 +190,43 @@ class FreeNom
                 sleep(1);
 
                 if (stripos($body, 'Order Confirmation') === false) { // 续期失败
-                    $result .= sprintf("%s续期失败\n", $domain);
+                    $result .= sprintf("%s續期失敗\n", $domain);
                     $notRenewed .= sprintf('<a href="http://%s" rel="noopener" target="_blank">%s</a>', $domain, $domain);
                     $notRenewedTG .= sprintf('[%s](http://%s)  ', $domain, $domain);
                 } else {
-                    $result .= sprintf("%s续期成功\n", $domain);
+                    $result .= sprintf("%s續期成功\n", $domain);
                     $renewed .= sprintf('<a href="http://%s" rel="noopener" target="_blank">%s</a>', $domain, $domain);
                     $renewedTG .= sprintf('[%s](http://%s)  ', $domain, $domain);
                     continue;
                 }
             }
 
-            $domainInfo .= sprintf('<a href="http://%s" rel="noopener" target="_blank">%s</a>还有<span style="font-weight: bold; font-size: 16px;">%d</span>天到期，', $domain, $domain, $days);
-            $domainInfoTG .= sprintf('[%s](http://%s)还有*%d*天到期，', $domain, $domain, $days);
+            $domainInfo .= sprintf('<a href="http://%s" rel="noopener" target="_blank">%s</a>還有<span style="font-weight: bold; font-size: 16px;">%d</span>天到期，', $domain, $domain, $days);
+            $domainInfoTG .= sprintf("[%s](http://%s)還有*%d*天到期\n，", $domain, $domain, $days);
         }
-        $domainInfoTG .= "更多信息可以参考[Freenom官网](https://my.freenom.com/domains.php?a=renewals)哦~\n\n（如果你不想每次执行都收到推送，请将 .env 中 NOTICE_FREQ 的值设为0，使程序只在有续期操作时才推送）";
+        $domainInfoTG .= "更多資訊可參考[Freenom官網](https://my.freenom.com/domains.php?a=renewals)哦~\n\n（如果不想每次執行都收到通知，請將 .env 中 NOTICE_FREQ 的數值設為0，使程式只在續期成功時才發送通知）";
 
         if ($notRenewed || $renewed) {
             Mail::send(
-                '主人，我刚刚帮你续期域名啦~',
+                '主人，我剛剛幫你續期域名啦~',
                 [
                     $this->username,
-                    $renewed ? sprintf('续期成功：%s<br>', $renewed) : '',
-                    $notRenewed ? sprintf('续期出错：%s<br>', $notRenewed) : '',
-                    $domainInfo ?: '哦豁，没看到其它域名。'
+                    $renewed ? sprintf('續期成功：%s<br>', $renewed) : '',
+                    $notRenewed ? sprintf('續期失敗：%s<br>', $notRenewed) : '',
+                    $domainInfo ?: '哎呀，沒有看到其他域名。。'
                 ]
             );
             TelegramBot::send(sprintf(
-                "主人，我刚刚帮你续期域名啦~\n\n%s%s\n另外，%s",
-                $renewedTG ? sprintf("续期成功：%s\n", $renewedTG) : '',
-                $notRenewedTG ? sprintf("续期失败：%s\n", $notRenewedTG) : '',
+                "主人，我剛剛幫你續期域名啦~\n\n%s%s\n另外，%s",
+                $renewedTG ? sprintf("續期成功：%s\n", $renewedTG) : '',
+                $notRenewedTG ? sprintf("續期失敗：%s\n", $notRenewedTG) : '',
                 $domainInfoTG
             ));
-            system_log(sprintf("%s：续期结果如下：\n%s", $this->username, $result));
+            system_log(sprintf("%s：續期結果如下：\n%s", $this->username, $result));
         } else {
             if (config('noticeFreq') == 1) {
                 Mail::send(
-                    '报告，今天没有域名需要续期',
+                    '報告，今天沒有域名需要續期',
                     [
                         $this->username,
                         $domainInfo
@@ -234,11 +234,11 @@ class FreeNom
                     '',
                     'notice'
                 );
-                TelegramBot::send("报告，今天没有域名需要续期，所有域名情况如下：\n\n" . $domainInfoTG);
+                TelegramBot::send("報告，今天沒有域名需要續期，所有域名情況如下：\n\n" . $domainInfoTG);
             } else {
-                system_log('当前通知频率为「仅当有续期操作时」，故本次不会推送通知');
+                system_log('目前通知頻率為「僅當續期操作成功時」，故本次不會發送任何通知');
             }
-            system_log(sprintf('%s：<green>执行成功，今次没有需要续期的域名</green>', $this->username));
+            system_log(sprintf('%s：<green>執行成功，這次沒有需要續期的域名</green>', $this->username));
         }
     }
 
@@ -329,14 +329,14 @@ class FreeNom
             '主人，' . $e->getMessage(),
             [
                 $this->username,
-                sprintf('具体是在%s文件的第%d行，抛出了一个异常。异常的内容是%s，快去看看吧。', $e->getFile(), $e->getLine(), $e->getMessage()),
+                sprintf('具體是在%s文件的第%d行，出現了一個錯誤。錯誤的內容是%s，快去看看吧。', $e->getFile(), $e->getLine(), $e->getMessage()),
             ],
             '',
             'LlfException'
         );
 
         TelegramBot::send(sprintf(
-            '主人，出错了。具体是在%s文件的第%d行，抛出了一个异常。异常的内容是%s，快去看看吧。（账户：%s）',
+            '主人，出錯了。具體是在%s文件的第%d行，出現了一個錯誤。錯誤的內容是%s，快去看看吧。（帳號：%s）',
             $e->getFile(),
             $e->getLine(),
             $e->getMessage(),
@@ -358,10 +358,10 @@ class FreeNom
 
                 $this->renewDomains();
             } catch (LlfException $e) {
-                system_log(sprintf('出错：<red>%s</red>', $e->getMessage()));
+                system_log(sprintf('出錯：<red>%s</red>', $e->getMessage()));
                 $this->sendExceptionReport($e);
             } catch (\Exception $e) {
-                system_log(sprintf('出错：<red>%s</red>', $e->getMessage()), $e->getTrace());
+                system_log(sprintf('出錯：<red>%s</red>', $e->getMessage()), $e->getTrace());
                 $this->sendExceptionReport($e);
             }
         }
